@@ -5,7 +5,6 @@ from PIL import ImageTk, Image
 #Tkinter init
 root = Tk()
 root.title('Image Viewer')
-root.geometry('800x600')
 
 #images loader
 i=0

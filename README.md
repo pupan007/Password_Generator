@@ -1,3 +1,3 @@
-# Photo_Viewer_Tkinter
+# Password_Generator
 
-Basic Photo Viewer made with Tkinter
+Basic Password Generator made with Tkinter

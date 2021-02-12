@@ -1,78 +1,98 @@
 import os
+import random as r
 from tkinter import *
-from PIL import ImageTk, Image
 
 #Tkinter init
 root = Tk()
-root.title('Image Viewer')
+root.title("Password Generator")
 
-#images loader
-i=0
-directory = 'images/' 
-images = []
-for image in os.listdir(directory):
-    if image.endswith(".png") or image.endswith(".jpg"):
-        temp =Image.open(directory+image)
-        temp = temp.resize((1024, 768), Image.ANTIALIAS)
-        img = ImageTk.PhotoImage(temp)
-        images.append(img)
+#GLOBAL VARIABLES
+password_lenght = 1
+small_c_var = IntVar()
+big_c_var = IntVar()
+numbers_c_var = IntVar()
+diac_c_var = IntVar()
+
+#generator
+def gen_diacrit():
+    numbers = []
+    y,x,z = r.randrange(33,48),r.randrange(58,65),r.randrange(123,127)
+    numbers.extend([x,y,z])
+    symbol = chr(numbers[r.randrange(0, len(numbers)-1)])
+    return symbol
+
+#controler
+def confirm():
+    global slider
+    global password_lenght
+    
+    password_lenght = slider.get()
+    number_entry.delete(0, END)
+    number_entry.insert(0, password_lenght)
+ 
+    
+def generator(small, big, digits, other, lenght):
+    global result
+    
+    num = small.get() + big.get() + digits.get() + other.get() 
+    result.delete(0, END)
+    result_string = ""
+    while len(result_string) != lenght and len(result_string) < lenght and num != 0:
+        if small.get() == 1:
+            result_string += chr(r.randrange(97,123))
+        if big.get() ==1:
+            result_string += chr(r.randrange(65, 91))
+        if digits.get() == 1:
+            result_string += str(r.randrange(0,10))  
+        if other.get() == 1:
+            result_string += gen_diacrit() 
+    if num != 0:       
+        result.insert(0, ''.join(r.sample(result_string,lenght)))
         
-#1st photo and status init
-photo = Label(image = images[i])
-photo.grid(row = 0, column= 0, columnspan = 3)
-status = Label(root, text = "Image " + str(i+1) + " of "+ str(len(images)), bd = 1, relief = SUNKEN, anchor = E)
+               
+#FRAMES
+##frames_init
+frame_length = LabelFrame(root)
+frame_options = LabelFrame(root, text= "Password Setup")
+frame_result = LabelFrame(root, text = "Password Generator")
 
-#utils
-def forward(len):
-    global photo
-    global i
-    global button_forward
-    global button_backward
-    global status
+##frame_lenght
+lenght_label = Label(frame_length, text ="Password lenght")
+number_entry = Entry(frame_length, width = 2, borderwidth = 4)
+slider  =  Scale(frame_length, from_ = 1, to = 24, orient = HORIZONTAL,sliderlength = 20,length= 65,borderwidth = 3)
+confirm = Button(frame_length, text= "Confirm", command = confirm)
+number_entry.insert(0, password_lenght)
 
-    i += 1
-    photo.grid_forget()
-    photo = Label(image = images[i])
-    photo.grid(row = 0, column= 0, columnspan = 3)
-    #status 
-    status = Label(root, text = "Image " + str(i+1) + " of "+ str(len+1),relief = SUNKEN, anchor = E)
-    status.grid(row = 2, column =0, columnspan = 3, sticky = W+E)
-    if i == len:
-        button_forward['state'] = DISABLED
-    if i != 0:
-        button_backward['state'] = NORMAL
-    
+##frame_options
+small_c= Checkbutton(frame_options, text = "Letters (a-z)", variable = small_c_var)
+big_c = Checkbutton(frame_options, text = "Letters (A-Z)",variable = big_c_var)
+numbers_c = Checkbutton(frame_options, text = "Digits (0-9)",variable = numbers_c_var) 
+diac_c = Checkbutton(frame_options, text = "Other characters", variable = diac_c_var)
 
-def backward(len):
-    global photo
-    global i
-    global button_backward
-    global status
-    i -= 1
-    photo.grid_forget()
-    photo = Label(image = images[i])
-    photo.grid(row = 0, column= 0, columnspan = 3)
-    #status 
-    status = Label(root, text = "Image " + str(i+1) + " of "+ str(len+1),relief = SUNKEN, anchor = E)
-    status.grid(row = 2, column =0, columnspan = 3, sticky = W+E)
-    if i == 0:
-        button_backward['state'] = DISABLED
-    if i != 9:
-        button_forward['state'] = NORMAL
-    
-
-#buttons
-button_backward = Button(root, text= "<<",padx = 50, command = lambda: backward(len(images)-1))
-if i == 0:
-    button_backward['state']= DISABLED
-button_exit = Button(root, text = "Exit Program",command =root.quit,padx = 50)
-button_forward = Button(root, text=">>",padx = 50, command = lambda: forward(len(images)-1))
+##frame_result
+result = Entry(frame_result, text="your password", width = 30, borderwidth = 5) 
+result_button = Button(frame_result,text="Generate", command = lambda:generator(small_c_var,big_c_var,numbers_c_var,diac_c_var,password_lenght))
 
 
-#photo and button rendering
-button_backward.grid(row = 1, column= 0)
-button_exit.grid(row =1, column= 1)
-button_forward.grid(row = 1, column= 2, pady = 5)
-status.grid(row = 2, column =0, columnspan = 3, sticky = W+E)
+#RENDERING
+##frame_lenght
+frame_length.pack(anchor = W ,padx = 10, pady = 5)
+lenght_label.grid(column = 0, row = 0)
+number_entry.grid(column = 1, row = 0)
+slider.grid(column = 1, row = 1)
+confirm.grid(column = 0, row = 1)
 
+##frame_options
+frame_options.pack(anchor = W,padx = 10, pady = 5)
+small_c.pack(anchor = W)
+big_c.pack(anchor = W)
+numbers_c.pack(anchor = W)
+diac_c.pack(anchor = W)
+
+##frame_result
+frame_result.pack(anchor = W,padx = 10, pady = 5)
+result.pack()
+result_button.pack()
+
+#mainloop
 root.mainloop()
